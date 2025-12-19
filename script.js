@@ -6,7 +6,6 @@ async function safeFetchJSON(url, options) {
 }
 
 /* ========= External APIs (Fetch) ========= */
-
 // Fetch #1: Dog image
 async function loadRandomDog() {
   const data = await safeFetchJSON("https://dog.ceo/api/breeds/image/random");
@@ -29,7 +28,6 @@ async function loadCatFact() {
 
 // Fetch #3: Breed list + search
 let BREEDS_CACHE = [];
-
 async function loadBreedList() {
   const data = await safeFetchJSON("https://dog.ceo/api/breeds/list/all");
   BREEDS_CACHE = Object.keys(data.message || {}).sort();
@@ -66,11 +64,11 @@ async function loadBreedImage() {
   if (img) {
     img.src = data.message;
     img.dataset.url = data.message;
+    img.dataset.breed = breed;
   }
 }
 
 /* ========= Your Backend API (Supabase via Vercel) ========= */
-
 async function loadFavoritesFromDB() {
   const box = document.getElementById("favoritesBox");
   if (box) box.innerHTML = `<div class="small">Loading favorites...</div>`;
@@ -81,7 +79,7 @@ async function loadFavoritesFromDB() {
   } catch (e) {
     console.error(e);
     if (box)
-      box.innerHTML = `<div class="small">If you are using VSCode Go Live, /api won't work. Test on your Vercel URL.</div>`;
+      box.innerHTML = `<div class="small">Favorites DB works after Vercel deploy. (Local Go Live may not support /api)</div>`;
   }
 }
 
@@ -99,6 +97,15 @@ async function deleteFavoriteFromDB(id) {
   });
 }
 
+function escapeHTML(s = "") {
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function renderFavorites(favs) {
   const box = document.getElementById("favoritesBox");
   if (!box) return;
@@ -109,24 +116,30 @@ function renderFavorites(favs) {
   }
 
   box.innerHTML = "";
-
   favs.forEach((item) => {
     const div = document.createElement("div");
     div.className = "card";
     div.style.boxShadow = "none";
 
-    const top = document.createElement("div");
-    top.className = "row";
-    top.style.justifyContent = "space-between";
+    const isDogImage = item.type === "dog";
 
-    const badge = document.createElement("div");
-    badge.className = "badge";
-    badge.textContent = item.type || "item";
+    div.innerHTML = `
+      <div class="row" style="justify-content:space-between; align-items:center;">
+        <div class="badge">${escapeHTML(item.type)}</div>
+        <button class="btn" data-del="${item.id}">Remove</button>
+      </div>
+      ${
+        isDogImage
+          ? `<img class="media" style="height:160px;margin-top:8px" src="${escapeHTML(
+              item.value
+            )}" alt="dog">`
+          : `<div class="small" style="margin-top:8px">${escapeHTML(
+              item.value
+            )}</div>`
+      }
+    `;
 
-    const btn = document.createElement("button");
-    btn.className = "btn";
-    btn.textContent = "Remove";
-    btn.addEventListener("click", async () => {
+    div.querySelector("[data-del]")?.addEventListener("click", async () => {
       try {
         await deleteFavoriteFromDB(item.id);
         await loadFavoritesFromDB();
@@ -134,36 +147,6 @@ function renderFavorites(favs) {
         alert("Remove failed: " + e.message);
       }
     });
-
-    top.appendChild(badge);
-    top.appendChild(btn);
-
-    div.appendChild(top);
-
-    // Show content
-    const isImage =
-      typeof item.value === "string" &&
-      (item.value.startsWith("http://") || item.value.startsWith("https://")) &&
-      (item.value.includes(".jpg") ||
-        item.value.includes(".jpeg") ||
-        item.value.includes(".png") ||
-        item.value.includes("dog.ceo"));
-
-    if (isImage) {
-      const img = document.createElement("img");
-      img.className = "media";
-      img.style.height = "160px";
-      img.style.marginTop = "8px";
-      img.src = item.value;
-      img.alt = item.type || "favorite";
-      div.appendChild(img);
-    } else {
-      const p = document.createElement("div");
-      p.className = "small";
-      p.style.marginTop = "8px";
-      p.textContent = item.value;
-      div.appendChild(p);
-    }
 
     box.appendChild(div);
   });
@@ -198,18 +181,25 @@ async function initAppPage() {
   document.getElementById("btnSaveDog")?.addEventListener("click", async () => {
     const url = document.getElementById("dogImg")?.dataset.url;
     if (!url) return;
-    await saveFavoriteToDB("dog", url);
-    await loadFavoritesFromDB();
+    try {
+      await saveFavoriteToDB("dog", url);
+      await loadFavoritesFromDB();
+    } catch (e) {
+      alert("Save Dog failed: " + e.message);
+    }
   });
 
   document.getElementById("btnSaveFact")?.addEventListener("click", async () => {
     const fact = document.getElementById("catFact")?.dataset.fact;
     if (!fact) return;
-    await saveFavoriteToDB("fact", fact);
-    await loadFavoritesFromDB();
+    try {
+      await saveFavoriteToDB("fact", fact);
+      await loadFavoritesFromDB();
+    } catch (e) {
+      alert("Save Fact failed: " + e.message);
+    }
   });
 
-  // voice only on App/Breeds (per your request)
   setupVoice();
   if (window.annyang) annyang.start({ autoRestart: true, continuous: false });
 }
@@ -218,27 +208,32 @@ async function initBreedsPage() {
   await loadBreedList();
   await loadBreedImage();
 
-  // Optional: show favorites box on breeds page if exists
-  if (document.getElementById("favoritesBox")) {
-    await loadFavoritesFromDB();
-  }
-
   document.getElementById("breedSearch")?.addEventListener("input", filterBreeds);
   document.getElementById("breedSelect")?.addEventListener("change", loadBreedImage);
   document.getElementById("btnBreed")?.addEventListener("click", loadBreedImage);
 
+  // Save current breed image into favorites as type "dog" (so it renders as image)
   document.getElementById("btnSaveBreed")?.addEventListener("click", async () => {
     const url = document.getElementById("breedImg")?.dataset.url;
     if (!url) return;
-    await saveFavoriteToDB("breed", url);
-    if (document.getElementById("favoritesBox")) {
-      await loadFavoritesFromDB();
+    try {
+      await saveFavoriteToDB("dog", url);
+      alert("Saved!");
+    } catch (e) {
+      alert("Save failed: " + e.message);
     }
   });
 
-  // voice
   setupVoice();
   if (window.annyang) annyang.start({ autoRestart: true, continuous: false });
 }
 
+function initCommonPage() {
+  setupVoice();
+  if (window.annyang) annyang.start({ autoRestart: true, continuous: false });
+}
 
+// expose to HTML inline calls
+window.initAppPage = initAppPage;
+window.initBreedsPage = initBreedsPage;
+window.initCommonPage = initCommonPage;
