@@ -202,16 +202,25 @@ async function initAppPage(){
 async function initBreedsPage(){
   await loadBreedList();
   await loadBreedImage();
+  await loadFavoritesFromDB(); // ✅ breeds页也加载 favorites
 
   document.getElementById("breedSearch")?.addEventListener("input", filterBreeds);
   document.getElementById("breedSelect")?.addEventListener("change", loadBreedImage);
   document.getElementById("btnBreed")?.addEventListener("click", loadBreedImage);
 
+  // ✅ Save Breed：把当前 breedImg 的 url 存入 favorites（type=dog）
+  document.getElementById("btnSaveBreed")?.addEventListener("click", async ()=>{
+    const url = document.getElementById("breedImg")?.dataset.url;
+    if(!url) return alert("Breed image not loaded yet.");
+    try{
+      await saveFavoriteToDB("dog", url);
+      await loadFavoritesFromDB();
+    }catch(e){
+      alert(`Save Breed failed: ${e.message}`);
+    }
+  });
+
   setupVoice();
   if(window.annyang) annyang.start({ autoRestart:true, continuous:false });
 }
 
-function initCommonPage(){
-  setupVoice();
-  if(window.annyang) annyang.start({ autoRestart:true, continuous:false });
-}

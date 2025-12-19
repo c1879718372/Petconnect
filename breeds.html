@@ -22,21 +22,21 @@
 
 <main class="container">
   <h1>Breed Search</h1>
-  <p class="small">Search breeds, load an image, then Save/Remove in Favorites.</p>
+  <p class="small">Search dog breeds and save a breed image to Favorites (Supabase).</p>
 
   <div class="card">
     <div class="row">
       <input id="breedSearch" class="input" placeholder="Type to filter (e.g. retriever)" />
       <select id="breedSelect" class="input"></select>
       <button id="btnBreed" class="btn primary">Load Breed Image</button>
+      <button id="btnSaveBreed" class="btn">Save Breed</button>
     </div>
 
     <div class="card" style="box-shadow:none;margin-top:12px;">
-      <div class="row" style="justify-content:space-between;align-items:center;">
-        <div class="small">Selected: <span id="breedName" class="badge">-</span></div>
-        <button id="btnSaveBreed" class="btn primary">Save Breed Image</button>
+      <img id="breedImg" class="media" alt="breed" />
+      <div class="small" style="margin-top:8px;">
+        Voice: <span class="badge">go app</span> <span class="badge">go home</span>
       </div>
-      <img id="breedImg" class="media" alt="breed" style="margin-top:10px;" />
     </div>
   </div>
 
@@ -47,7 +47,6 @@
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
-<script src="https://unpkg.com/simple-slider/dist/simpleslider.min.js"></script>
 <script src="script.js"></script>
 <script>
   initBreedsPage();
