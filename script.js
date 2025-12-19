@@ -91,6 +91,13 @@ async function saveFavoriteToDB(value) {
   });
 }
 
+async function deleteFavoriteFromDB(id){
+  return await safeFetchJSON(`/api/favorites?id=${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+}
+
+
 async function deleteFavoriteFromDB(id) {
   return await safeFetchJSON(`/api/favorites?id=${encodeURIComponent(id)}`, {
     method: "DELETE",
@@ -106,49 +113,56 @@ function escapeHTML(s = "") {
     .replaceAll("'", "&#039;");
 }
 
-function renderFavorites(favs) {
-    const isImage =
-    typeof item.value === "string" &&
-    (item.value.startsWith("http://") || item.value.startsWith("https://"));
+function renderFavorites(favs){
+  const box = document.getElementById("favoritesBox");
+  if(!box) return;
 
-    const label = isImage ? "image" : "text";
+  if(!favs.length){
+    box.innerHTML = `<div class="small">No favorites saved yet.</div>`;
+    return;
+  }
 
   box.innerHTML = "";
-  favs.forEach((item) => {
+  favs.forEach(item=>{
     const div = document.createElement("div");
     div.className = "card";
     div.style.boxShadow = "none";
 
-    const isDogImage = item.type === "dog";
+    const topRow = document.createElement("div");
+    topRow.className = "row";
+    topRow.style.justifyContent = "space-between";
 
-    div.innerHTML = `
-      <div class="row" style="justify-content:space-between; align-items:center;">
-        <div class="badge">${label}</div>
-        <button class="btn" data-del="${item.id}">Remove</button>
-      </div>
-      ${
-        isDogImage
-          ? `<img class="media" style="height:160px;margin-top:8px" src="${escapeHTML(
-              item.value
-            )}" alt="dog">`
-          : `<div class="small" style="margin-top:8px">${escapeHTML(
-              item.value
-            )}</div>`
-      }
-    `;
+    const badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent = item.type || "favorite";
 
-    div.querySelector("[data-del]")?.addEventListener("click", async () => {
-      try {
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = "Remove";
+    btn.addEventListener("click", async ()=>{
+      try{
         await deleteFavoriteFromDB(item.id);
         await loadFavoritesFromDB();
-      } catch (e) {
-        alert("Remove failed: " + e.message);
+      }catch(e){
+        alert("Delete failed: " + e.message);
       }
     });
+
+    topRow.appendChild(badge);
+    topRow.appendChild(btn);
+
+    div.appendChild(topRow);
+
+    if(item.type === "dog"){
+      div.innerHTML += `<img class="media" style="height:160px;margin-top:8px" src="${item.value}" alt="dog">`;
+    } else {
+      div.innerHTML += `<div class="small" style="margin-top:8px">${item.value}</div>`;
+    }
 
     box.appendChild(div);
   });
 }
+
 
 /* ========= JS Library #1: annyang (voice) ========= */
 function setupVoice() {
