@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PetConnect | Breeds</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand">PetConnect</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="app.html">App</a></li>
+        <li><a href="breeds.html">Breeds</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Breed Search</h1>
+  <p class="small">Search dog breeds and load a random image. You can also save it to Favorites.</p>
+
+  <div class="card">
+    <div class="row">
+      <input id="breedSearch" class="input" placeholder="Type to filter (e.g. retriever)" />
+      <select id="breedSelect" class="input"></select>
+      <button id="btnBreed" class="btn primary">Load Breed Image</button>
+      <button id="btnSaveBreed" class="btn">Save Breed Image</button>
+    </div>
+
+    <div class="card" style="box-shadow:none;margin-top:12px;">
+      <img id="breedImg" class="media" alt="breed" />
+      <div class="small" style="margin-top:8px;">
+        Voice: <span class="badge">new dog</span> <span class="badge">new fact</span>
+        <span class="badge">go app</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Favorites (Supabase DB)</h2>
+    <div id="favoritesBox" class="grid"></div>
+  </div>
+</main>
+
+<!-- JS Libraries (2) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+<script src="https://unpkg.com/simple-slider/dist/simpleslider.min.js"></script>
+<script src="script.js"></script>
+<script>
+  initBreedsPage();
+</script>
+</body>
+</html>
