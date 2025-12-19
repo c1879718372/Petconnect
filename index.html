@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PetConnect | Home</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand">PetConnect</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="app.html">App</a></li>
+        <li><a href="breeds.html">Breeds</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>PetConnect</h1>
+  <p class="small">Public APIs + Your own backend (Supabase via Vercel). Voice commands supported.</p>
+
+  <div class="card">
+    <h2>Pages</h2>
+    <div class="row">
+      <a class="btn primary" href="app.html">Open App</a>
+      <a class="btn" href="breeds.html">Breed Search</a>
+      <a class="btn" href="about.html">About</a>
+    </div>
+    <p class="small" style="margin-top:10px;">
+      Voice examples: <span class="badge">new dog</span> <span class="badge">new fact</span> <span class="badge">go breeds</span>
+    </p>
+  </div>
+</main>
+
+<!-- JS Libraries (2) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+<script src="https://unpkg.com/simple-slider/dist/simpleslider.min.js"></script>
+<script src="script.js"></script>
+<script>
+  initCommonPage();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PetConnect | App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand">PetConnect</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="app.html">App</a></li>
+        <li><a href="breeds.html">Breeds</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Pet Dashboard</h1>
+  <p class="small">New Dog / New Fact use public APIs. Save uses your backend + Supabase.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Random Dog</h2>
+      <img id="dogImg" class="media" alt="dog" />
+      <div class="row" style="margin-top:10px;">
+        <button id="btnNewDog" class="btn">New Dog</button>
+        <button id="btnSaveDog" class="btn primary">Save Dog</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Cat Fact</h2>
+      <div id="catFact" class="small">Loading…</div>
+      <div class="row" style="margin-top:10px;">
+        <button id="btnNewFact" class="btn">New Fact</button>
+        <button id="btnSaveFact" class="btn primary">Save Fact</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Favorites (Supabase DB)</h2>
+    <div id="favoritesBox" class="grid"></div>
+  </div>
+</main>
+
+<!-- JS Libraries (2) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+<script src="https://unpkg.com/simple-slider/dist/simpleslider.min.js"></script>
+<script src="script.js"></script>
+<script>
+  initAppPage();
+</script>
+</body>
+</html>
