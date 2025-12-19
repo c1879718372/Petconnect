@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,11 +25,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ favorites: data });
     }
 
-    // POST: insert
+    // POST: save favorite
     if (req.method === "POST") {
-      const { type, value } = req.body || {};
-      if (!type || !value)
+      const body = req.body || {};
+      const type = body.type;
+      const value = body.value;
+
+      if (!type || !value) {
         return res.status(400).json({ error: "type and value required" });
+      }
 
       const { data, error } = await supabase
         .from("favorites")
@@ -41,10 +45,10 @@ export default async function handler(req, res) {
       return res.status(201).json({ saved: data });
     }
 
-    // ✅ DELETE: delete by id  /api/favorites?id=123
+    // DELETE: remove by id -> /api/favorites?id=123
     if (req.method === "DELETE") {
       const id = req.query?.id;
-      if (!id) return res.status(400).json({ error: "id required" });
+      if (!id) return res.status(400).json({ error: "Missing id" });
 
       const { error } = await supabase.from("favorites").delete().eq("id", id);
       if (error) return res.status(500).json({ error: error.message });
@@ -57,4 +61,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
 }
-
