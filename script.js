@@ -83,11 +83,11 @@ async function loadFavoritesFromDB() {
   }
 }
 
-async function saveFavoriteToDB(type, value) {
+async function saveFavoriteToDB(value) {
   return await safeFetchJSON("/api/favorites", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type, value }),
+    body: JSON.stringify({ value }),
   });
 }
 
@@ -107,13 +107,11 @@ function escapeHTML(s = "") {
 }
 
 function renderFavorites(favs) {
-  const box = document.getElementById("favoritesBox");
-  if (!box) return;
+    const isImage =
+    typeof item.value === "string" &&
+    (item.value.startsWith("http://") || item.value.startsWith("https://"));
 
-  if (!favs.length) {
-    box.innerHTML = `<div class="small">No favorites saved yet.</div>`;
-    return;
-  }
+    const label = isImage ? "image" : "text";
 
   box.innerHTML = "";
   favs.forEach((item) => {
@@ -125,7 +123,7 @@ function renderFavorites(favs) {
 
     div.innerHTML = `
       <div class="row" style="justify-content:space-between; align-items:center;">
-        <div class="badge">${escapeHTML(item.type)}</div>
+        <div class="badge">${label}</div>
         <button class="btn" data-del="${item.id}">Remove</button>
       </div>
       ${
@@ -182,7 +180,7 @@ async function initAppPage() {
     const url = document.getElementById("dogImg")?.dataset.url;
     if (!url) return;
     try {
-      await saveFavoriteToDB("dog", url);
+      await saveFavoriteToDB(url);
       await loadFavoritesFromDB();
     } catch (e) {
       alert("Save Dog failed: " + e.message);
@@ -193,7 +191,7 @@ async function initAppPage() {
     const fact = document.getElementById("catFact")?.dataset.fact;
     if (!fact) return;
     try {
-      await saveFavoriteToDB("fact", fact);
+      await saveFavoriteToDB(fact);
       await loadFavoritesFromDB();
     } catch (e) {
       alert("Save Fact failed: " + e.message);
@@ -217,7 +215,7 @@ async function initBreedsPage() {
     const url = document.getElementById("breedImg")?.dataset.url;
     if (!url) return;
     try {
-      await saveFavoriteToDB("dog", url);
+      await saveFavoriteToDB(url);
       alert("Saved!");
     } catch (e) {
       alert("Save failed: " + e.message);
