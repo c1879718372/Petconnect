@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
-    // ---------- GET: list favorites ----------
+    // GET /api/favorites  -> list
     if (req.method === "GET") {
       const { data, error } = await supabase
         .from("favorites")
@@ -26,29 +26,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ favorites: data });
     }
 
-    // ---------- POST: save favorite ----------
+    // POST /api/favorites -> create {type,value}
     if (req.method === "POST") {
-      const body =
-        typeof req.body === "string"
-          ? JSON.parse(req.body || "{}")
-          : (req.body || {});
+      const { type, value } = req.body || {};
+      if (!type || !value) return res.status(400).json({ error: "type and value required" });
 
-      const { type, value, label } = body;
-      if (!type || !value) {
-        return res.status(400).json({ error: "type and value required" });
-      }
-
-      // 如果你的表没有 label 列，也没关系：我们只插 type/value
-      const payload = [{ type, value }];
-      // 如果你 Supabase 表里确实有 label 列，可以改成：[{ type, value, label: label || null }]
-
-      const { data, error } = await supabase.from("favorites").insert(payload).select("*");
+      const { data, error } = await supabase
+        .from("favorites")
+        .insert([{ type, value }])
+        .select("*")
+        .single();
 
       if (error) return res.status(500).json({ error: error.message });
-      return res.status(201).json({ saved: data[0] });
+      return res.status(201).json({ saved: data });
     }
 
-    // ---------- DELETE: remove by id ----------
+    // DELETE /api/favorites?id=123 -> delete one
     if (req.method === "DELETE") {
       const id = req.query?.id;
       if (!id) return res.status(400).json({ error: "Missing id" });
@@ -64,4 +57,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
 }
-
